@@ -1,0 +1,673 @@
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
+import { CreateSubmissionDto } from './dto/create-submission.dto';
+import { UpdateSubmissionDto } from './dto/update-submission.dto';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../utils/emailService';
+import { NotificationsService } from '../notifications/notifications.service';
+
+@Injectable()
+export class SubmissionsService {
+  constructor(
+    private httpService: HttpService,
+    private configService: ConfigService,
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) { }
+
+  async create(userId: string, createDto: CreateSubmissionDto) {
+    // Fetch real user data from database
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if user is registered for this hackathon
+    const participation = await this.prisma.hackathonParticipant.findUnique({
+      where: {
+        userId_hackathonId: {
+          userId: userId,
+          hackathonId: createDto.hackathonId,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!participation) {
+      throw new ForbiddenException('You must be registered for this hackathon to submit');
+    }
+
+    // Create submission in database
+    const submission = await this.prisma.submission.create({
+      data: {
+        title: createDto.title,
+        description: createDto.description,
+        repoUrl: createDto.repositoryUrl,
+        demoUrl: createDto.liveUrl,
+        hackathonId: createDto.hackathonId,
+        participantId: participation.id,
+        teamId: createDto.teamId,
+        status: createDto.isDraft ? 'DRAFT' : 'SUBMITTED',
+        submittedAt: createDto.isDraft ? null : new Date(),
+      },
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        team: {
+          include: {
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Create submission files if provided
+    if (createDto.files && createDto.files.length > 0) {
+      await Promise.all(
+        createDto.files.map((file: any) =>
+          this.prisma.submissionFile.create({
+            data: {
+              submissionId: submission.id,
+              fileName: file.name || 'Unknown',
+              fileUrl: file.url || '',
+              fileType: file.type || 'application/octet-stream',
+              fileSize: file.size || 0,
+            },
+          })
+        )
+      );
+    }
+
+    // Send submission email if final submission (not draft)
+    if (!createDto.isDraft && submission.participant?.user) {
+      try {
+        const hackathon = await this.prisma.hackathon.findUnique({
+          where: { id: createDto.hackathonId },
+          select: { title: true },
+        });
+
+        if (hackathon) {
+          const user = submission.participant.user;
+          const { submissionEmail } = await import('../utils/emailTemplates');
+          const emailTemplate = submissionEmail(
+            `${user.firstName} ${user.lastName}`,
+            hackathon.title,
+            submission.title
+          );
+
+          // @ts-ignore
+          const emailService = new EmailService(this.prisma);
+          await emailService.sendEmailWithLogging(user.email, emailTemplate.subject, emailTemplate.html);
+        }
+      } catch (error) {
+        console.error('Failed to send submission email:', error);
+        // Don't fail submission if email fails
+      }
+    }
+
+    // Notify host about new submission
+    if (!createDto.isDraft) {
+      try {
+        const hackathon = await this.prisma.hackathon.findUnique({
+          where: { id: createDto.hackathonId },
+          select: { id: true, title: true, organizerId: true },
+        });
+        if (hackathon?.organizerId && submission.participant?.user) {
+          await this.notificationsService.notifyHostSubmissionCreated(
+            hackathon.organizerId,
+            hackathon.id,
+            hackathon.title,
+            `${submission.participant.user.firstName} ${submission.participant.user.lastName}`
+          );
+        }
+      } catch (error) {
+        console.error('Failed to send notification to host:', error);
+        // Don't fail submission if notification fails
+      }
+
+      // Notify participant about successful submission
+      try {
+        const hackathon = await this.prisma.hackathon.findUnique({
+          where: { id: createDto.hackathonId },
+          select: { title: true },
+        });
+        if (hackathon) {
+          await this.notificationsService.notifyParticipantSubmissionSuccess(
+            userId,
+            createDto.hackathonId,
+            hackathon.title
+          );
+        }
+      } catch (error) {
+        console.error('Failed to send notification to participant:', error);
+        // Don't fail submission if notification fails
+      }
+    }
+
+    return {
+      ...submission,
+      submitter: submission.participant?.user,
+      teamInfo: submission.team,
+      files: createDto.files || [],
+      repositoryUrl: submission.repoUrl, // Map repoUrl to repositoryUrl for frontend compatibility
+      type: submission.teamId ? 'TEAM' : 'INDIVIDUAL', // Determine submission type
+      selectedTrack: submission.participant?.selectedTrack, // Get selected track from participant
+    };
+  }
+
+  async findAll(filters?: { hackathonId?: string; userId?: string; teamId?: string; status?: string; isDraft?: boolean }, userRole?: string, userId?: string) {
+    const where: any = {};
+
+    if (filters?.hackathonId) {
+      where.hackathonId = filters.hackathonId;
+    }
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    if (filters?.teamId) {
+      where.teamId = filters.teamId;
+    }
+
+    // Apply userId filter if explicitly provided
+    if (filters?.userId) {
+      where.participant = {
+        userId: filters.userId,
+      };
+    }
+
+    // Role-based filtering
+    if (userRole === 'PARTICIPANT' && !filters?.userId) {
+      // Participants can only see their own submissions
+      where.participant = {
+        userId: userId,
+      };
+    } else if (userRole === 'ORGANIZER' && !filters?.hackathonId && !filters?.userId) {
+      // Organizers can see all submissions for their hackathons
+      const organizerHackathons = await this.prisma.hackathon.findMany({
+        where: { organizerId: userId },
+        select: { id: true },
+      });
+
+      if (organizerHackathons.length > 0) {
+        where.hackathonId = {
+          in: organizerHackathons.map(h => h.id),
+        };
+      } else {
+        // If organizer has no hackathons, return empty array
+        return [];
+      }
+    }
+    // JUDGES and ADMINS can see all submissions (no additional filtering)
+
+    const submissions = await this.prisma.submission.findMany({
+      where,
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        team: {
+          include: {
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        hackathon: {
+          select: {
+            id: true,
+            title: true,
+            problemStatements: {
+              select: {
+                trackNumber: true,
+                trackTitle: true,
+              },
+              orderBy: {
+                trackNumber: 'asc',
+              },
+            },
+          },
+        },
+        files: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return submissions.map((submission) => ({
+      ...submission,
+      submitter: submission.participant?.user,
+      teamInfo: submission.team,
+      isDraft: submission.status === 'DRAFT',
+      isFinal: submission.status === 'SUBMITTED',
+      submitterId: submission.participant?.userId,
+      repositoryUrl: submission.repoUrl, // Map repoUrl to repositoryUrl for frontend compatibility
+      type: submission.teamId ? 'TEAM' : 'INDIVIDUAL', // Determine submission type
+      selectedTrack: submission.participant?.selectedTrack, // Get selected track from participant
+      // Map problem statements to tracks format for frontend compatibility
+      hackathon: {
+        ...submission.hackathon,
+        tracks: submission.hackathon.problemStatements?.map(ps => ({
+          title: ps.trackTitle,
+          number: ps.trackNumber,
+        })) || [],
+      },
+      files: submission.files?.map(file => ({
+        name: file.fileName,
+        url: file.fileUrl,
+        type: file.fileType,
+        size: file.fileSize,
+        downloadUrl: file.fileUrl,
+      })) || [],
+    }));
+  }
+
+  async findOne(id: string, userRole?: string, userId?: string) {
+    const submission = await this.prisma.submission.findUnique({
+      where: { id },
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        team: {
+          include: {
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        hackathon: {
+          select: {
+            id: true,
+            title: true,
+            problemStatements: {
+              select: {
+                trackNumber: true,
+                trackTitle: true,
+              },
+              orderBy: {
+                trackNumber: 'asc',
+              },
+            },
+          },
+        },
+        files: true,
+      },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Role-based access control
+    const canAccessFiles = userRole === 'ORGANIZER' || userRole === 'JUDGE' || userRole === 'ADMIN';
+    const isOwner = userId && submission.participant?.userId === userId;
+
+    if (!canAccessFiles && !isOwner) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return {
+      ...submission,
+      submitter: submission.participant?.user,
+      teamInfo: submission.team,
+      isDraft: submission.status === 'DRAFT',
+      isFinal: submission.status === 'SUBMITTED',
+      submitterId: submission.participant?.userId,
+      repositoryUrl: submission.repoUrl, // Map repoUrl to repositoryUrl for frontend compatibility
+      type: submission.teamId ? 'TEAM' : 'INDIVIDUAL', // Determine submission type
+      selectedTrack: submission.participant?.selectedTrack, // Get selected track from participant
+      // Map problem statements to tracks format for frontend compatibility
+      hackathon: {
+        ...submission.hackathon,
+        tracks: submission.hackathon.problemStatements?.map(ps => ({
+          title: ps.trackTitle,
+          number: ps.trackNumber,
+        })) || [],
+      },
+      files: submission.files?.map(file => ({
+        name: file.fileName,
+        url: file.fileUrl,
+        type: file.fileType,
+        size: file.fileSize,
+        downloadUrl: file.fileUrl,
+      })) || [],
+    };
+  }
+
+  async update(userId: string, id: string, updateDto: UpdateSubmissionDto) {
+    const submission = await this.prisma.submission.findUnique({
+      where: { id },
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    if (submission.participant?.userId !== userId) {
+      throw new ForbiddenException('You can only update your own submissions');
+    }
+
+    const updatedSubmission = await this.prisma.submission.update({
+      where: { id },
+      data: {
+        title: updateDto.title,
+        description: updateDto.description,
+        repoUrl: updateDto.repositoryUrl,
+        demoUrl: updateDto.liveUrl,
+        status: updateDto.isDraft ? 'DRAFT' : 'SUBMITTED',
+        submittedAt: updateDto.isDraft ? null : new Date(),
+        updatedAt: new Date(),
+      },
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        team: {
+          include: {
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        files: true,
+      },
+    });
+
+    // Send submission email if status changed from DRAFT to SUBMITTED
+    const wasSubmitted = submission.status === 'DRAFT' && !updateDto.isDraft;
+    if (wasSubmitted && updatedSubmission.participant?.user) {
+      try {
+        const hackathon = await this.prisma.hackathon.findUnique({
+          where: { id: updatedSubmission.hackathonId },
+          select: { title: true },
+        });
+
+        if (hackathon) {
+          const user = updatedSubmission.participant.user;
+          const { submissionEmail } = await import('../utils/emailTemplates');
+          const emailTemplate = submissionEmail(
+            `${user.firstName} ${user.lastName}`,
+            hackathon.title,
+            updatedSubmission.title
+          );
+
+          // @ts-ignore
+          const emailService = new EmailService(this.prisma);
+          await emailService.sendEmailWithLogging(user.email, emailTemplate.subject, emailTemplate.html);
+        }
+      } catch (error) {
+        console.error('Failed to send submission email:', error);
+        // Don't fail update if email fails
+      }
+    }
+
+    // Notify host about submission update
+    if (!updateDto.isDraft) {
+      try {
+        const hackathon = await this.prisma.hackathon.findUnique({
+          where: { id: updatedSubmission.hackathonId },
+          select: { id: true, title: true, organizerId: true },
+        });
+        if (hackathon?.organizerId && updatedSubmission.participant?.user) {
+          await this.notificationsService.notifyHostSubmissionUpdated(
+            hackathon.organizerId,
+            hackathon.id,
+            hackathon.title,
+            `${updatedSubmission.participant.user.firstName} ${updatedSubmission.participant.user.lastName}`
+          );
+        }
+      } catch (error) {
+        console.error('Failed to send notification to host:', error);
+        // Don't fail update if notification fails
+      }
+    }
+
+    return {
+      ...updatedSubmission,
+      submitter: updatedSubmission.participant?.user,
+      teamInfo: updatedSubmission.team,
+      isDraft: updatedSubmission.status === 'DRAFT',
+      isFinal: updatedSubmission.status === 'SUBMITTED',
+      submitterId: updatedSubmission.participant?.user?.id,
+      repositoryUrl: updatedSubmission.repoUrl, // Map repoUrl to repositoryUrl for frontend compatibility
+      type: updatedSubmission.teamId ? 'TEAM' : 'INDIVIDUAL', // Determine submission type
+      selectedTrack: updatedSubmission.participant?.selectedTrack, // Get selected track from participant
+      files: updatedSubmission.files?.map(file => ({
+        name: file.fileName,
+        url: file.fileUrl,
+        type: file.fileType,
+        size: file.fileSize,
+        downloadUrl: file.fileUrl,
+      })) || [],
+    };
+  }
+
+  async remove(userId: string, id: string) {
+    const submission = await this.prisma.submission.findUnique({
+      where: { id },
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    if (submission.participant?.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own submissions');
+    }
+
+    await this.prisma.submission.delete({
+      where: { id },
+    });
+
+    return { message: 'Submission deleted successfully' };
+  }
+
+  async updateStatus(userId: string, id: string, status: string, feedback?: string) {
+    const submission = await this.prisma.submission.findUnique({
+      where: { id },
+      include: {
+        participant: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        hackathon: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+
+    // Update submission status
+    const updatedSubmission = await this.prisma.submission.update({
+      where: { id },
+      data: { status: status as any },
+    });
+
+    // Send judge decision email for specific statuses
+    const emailStatuses = ['UNDER_REVIEW', 'REJECTED', 'ACCEPTED'];
+    if (emailStatuses.includes(status) && submission.participant?.user && submission.hackathon) {
+      try {
+        const user = submission.participant.user;
+        const hackathon = submission.hackathon;
+
+        let statusForEmail: 'ACCEPTED' | 'REJECTED' | 'UNDER_REVIEW';
+
+        switch (status) {
+          case 'UNDER_REVIEW':
+            statusForEmail = 'UNDER_REVIEW';
+            break;
+          case 'REJECTED':
+            statusForEmail = 'REJECTED';
+            break;
+          case 'ACCEPTED':
+            statusForEmail = 'ACCEPTED';
+            break;
+          default:
+            statusForEmail = 'UNDER_REVIEW';
+        }
+
+        const { judgeDecisionEmail } = await import('../utils/emailTemplates');
+        const emailTemplate = judgeDecisionEmail(
+          `${user.firstName} ${user.lastName}`,
+          hackathon.title,
+          submission.title,
+          statusForEmail,
+          feedback
+        );
+
+        // @ts-ignore
+        const emailService = new EmailService(this.prisma);
+        await emailService.sendEmailWithLogging(user.email, emailTemplate.subject, emailTemplate.html);
+      } catch (error) {
+        console.error('Failed to send judge decision email:', error);
+        // Don't fail status update if email fails
+      }
+    }
+
+    return updatedSubmission;
+  }
+}

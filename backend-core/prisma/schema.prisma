@@ -1,0 +1,433 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum HackathonType {
+  INDIVIDUAL
+  TEAM
+}
+
+enum HackathonStatus {
+  UPCOMING
+  LIVE
+  ENDED
+}
+
+enum ParticipantRole {
+  LEADER
+  MEMBER
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// ============================================
+// USER MODEL (EXISTING - PRESERVED)
+// ============================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          String    @default("PARTICIPANT")
+  status        String    @default("ACTIVE")
+  avatarUrl     String?
+  bio           String?
+  githubUrl     String?
+  linkedinUrl   String?
+  portfolioUrl  String?
+  
+  // Email verification
+  emailVerified Boolean   @default(false)
+  otpHash       String?
+  otpExpiresAt  DateTime?
+  
+  // Host approval system
+  hostApproved    Boolean   @default(false)
+  hostRequestedAt DateTime?
+  hostApprovedAt  DateTime?
+  
+  // Host Details (New)
+  organizationName String?
+  phoneNumber      String?
+  experienceLevel  String?
+  hostOnboarded    Boolean   @default(false)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  organizedHackathons       Hackathon[]              @relation("HackathonOrganizer")
+  participations            HackathonParticipant[]
+  ledTeams                  Team[]                   @relation("TeamLeader")
+  uploadedProblemStatements HackathonProblemStatement[]
+  reviews                   Review[]
+  notifications             Notification[]
+  payments                  Payment[]                @relation("HostPayments")
+
+  @@map("users")
+}
+
+// ============================================
+// HACKATHON MODEL (ROOT ENTITY)
+// ============================================
+
+model Hackathon {
+  id              String          @id @default(uuid())
+  title           String
+  description     String
+  type            HackathonType   @default(TEAM)
+  status          HackathonStatus @default(UPCOMING)
+  
+  // Configurable limits (NOT hardcoded)
+  minTeamSize     Int             @default(1)
+  maxTeamSize     Int             @default(5)
+  maxTeams        Int?            // Nullable - no limit if null
+  maxParticipants Int?            // Nullable - no limit if null
+  
+  // Dates
+  startDate       DateTime
+  endDate         DateTime
+  registrationStart DateTime?
+  registrationDeadline DateTime?
+  submissionDeadline DateTime?
+  
+  // Organizer
+  organizerId     String
+  organizer       User            @relation("HackathonOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  bannerUrl         String?
+  logoUrl           String?
+  location          String?
+  isVirtual         Boolean         @default(false)
+  
+  // Extended Metadata
+  category          String          @default("WEB_DEVELOPMENT")
+  whyParticipate    String?         @db.Text
+  expectedOutcome   String?         @db.Text
+  rules             String?         @db.Text
+  guidelines        String?         @db.Text
+  termsAndConditions String?        @db.Text
+  
+  // Contact Info
+  contactPerson     String?
+  contactEmail      String?
+  contactPhone      String?
+  
+  // Prize Info
+  prizeAmount       Float?          @default(0)
+  prizeCurrency     String?         @default("USD")
+  prizePool         String?         // Legacy field
+  registrationFee   Float?          @default(0)
+  
+  // New Fields
+  judges          Json?
+  judgingCriteria Json?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  participants    HackathonParticipant[]
+  teams           Team[]
+  submissions     Submission[]
+  problemStatements HackathonProblemStatement[]
+  reviews         Review[]
+  notifications   Notification[]
+  payments        Payment[]
+
+  @@map("hackathons")
+}
+
+// ============================================
+// HACKATHON PARTICIPANT (SINGLE SOURCE OF TRUTH)
+// ============================================
+
+model HackathonParticipant {
+  id            String          @id @default(uuid())
+  
+  // Links
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  hackathonId   String
+  hackathon     Hackathon       @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  
+  // Optional team membership
+  teamId        String?
+  team          Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  
+  // Role in team (only relevant if teamId is set)
+  role          ParticipantRole @default(MEMBER)
+  
+  // Selected problem statement track (1-5)
+  selectedTrack Int?
+  
+  // Metadata
+  registeredAt  DateTime        @default(now())
+  
+  // Relations
+  individualSubmissions Submission[] @relation("IndividualSubmission")
+
+  // Constraints
+  @@unique([userId, hackathonId])
+  @@map("hackathon_participants")
+}
+
+// ============================================
+// TEAM MODEL (OPTIONAL, HACKATHON-SCOPED)
+// ============================================
+
+model Team {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  
+  // Belongs to one hackathon
+  hackathonId   String
+  hackathon     Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  
+  // Team leader
+  leaderId      String
+  leader        User      @relation("TeamLeader", fields: [leaderId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  members       HackathonParticipant[]
+  submissions   Submission[]           @relation("TeamSubmission")
+
+  @@map("teams")
+}
+
+// ============================================
+// SUBMISSION MODEL (UNIFIED: TEAM OR INDIVIDUAL)
+// ============================================
+
+model Submission {
+  id            String           @id @default(uuid())
+  title         String
+  description   String
+  demoUrl       String?
+  repoUrl       String?
+  status        SubmissionStatus @default(DRAFT)
+  
+  // Belongs to hackathon
+  hackathonId   String
+  hackathon     Hackathon        @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  
+  // EITHER team OR individual (one must be set)
+  teamId        String?
+  team          Team?            @relation("TeamSubmission", fields: [teamId], references: [id], onDelete: Cascade)
+  
+  participantId String?
+  participant   HackathonParticipant? @relation("IndividualSubmission", fields: [participantId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  submittedAt   DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  files         SubmissionFile[]
+  reviews       Review[]
+
+  @@map("submissions")
+}
+
+// ============================================
+// SUBMISSION FILE (NEW MODEL - FILE METADATA ONLY)
+// ============================================
+
+model SubmissionFile {
+  id            String     @id @default(uuid())
+  
+  // Belongs to submission
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  // File metadata (NO raw file storage)
+  fileName      String
+  fileUrl       String     // URL to cloud storage (Azure/B2/S3)
+  fileType      String     // MIME type
+  fileSize      Int        // Size in bytes
+  
+  uploadedAt    DateTime   @default(now())
+
+  @@map("submission_files")
+}
+
+// ============================================
+// HACKATHON PROBLEM STATEMENT (NEW MODEL - ORGANIZER FILES)
+// ============================================
+
+model HackathonProblemStatement {
+  id            String    @id @default(uuid())
+  
+  // Belongs to hackathon
+  hackathonId   String
+  hackathon     Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  
+  // Uploaded by organizer
+  uploadedById  String
+  uploadedBy    User      @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  
+  // Track information
+  trackNumber   Int       // Track number (1-5)
+  trackTitle    String    // Track title/name
+  
+  // File metadata (NO raw file storage)
+  fileName      String
+  fileUrl       String    // URL to cloud storage
+  fileType      String    // MIME type (PDF, PPT, DOC, etc.)
+  fileSize      Int       // Size in bytes
+  
+  // Optional description
+  description   String?
+  
+  uploadedAt    DateTime  @default(now())
+
+  @@unique([hackathonId, trackNumber])
+  @@map("hackathon_problem_statements")
+}
+
+// ============================================
+// REVIEW MODEL (EXISTING CONCEPT - EXTENDED)
+// ============================================
+
+model Review {
+  id            String     @id @default(uuid())
+  
+  // Links
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  reviewerId    String
+  reviewer      User       @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  
+  hackathonId   String
+  hackathon     Hackathon  @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  
+  // Review content
+  rating        Int        // 1-10 scale
+  feedback      String?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([submissionId, reviewerId])
+  @@map("reviews")
+}
+
+// ============================================
+// NOTIFICATION MODEL (EXISTING CONCEPT - EXTENDED)
+// ============================================
+
+model Notification {
+  id            String    @id @default(uuid())
+  
+  // Recipient
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Optional hackathon context
+  hackathonId   String?
+  hackathon     Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  
+  // Notification content
+  type          String    // TEAM_INVITE, SUBMISSION_REVIEWED, etc.
+  title         String
+  message       String
+  isRead        Boolean   @default(false)
+  
+  createdAt     DateTime  @default(now())
+
+  @@map("notifications")
+}
+
+// ============================================
+// EMAIL LOG MODEL (EMAIL DELIVERY TRACKING)
+// ============================================
+
+model EmailLog {
+  id        String      @id @default(uuid())
+  to        String
+  subject   String
+  status    EmailStatus
+  error     String?
+  createdAt DateTime    @default(now())
+
+  @@map("email_logs")
+}
+
+// ============================================
+// PAYMENT MODEL (NEW)
+// ============================================
+
+model Payment {
+  id                String        @id @default(uuid())
+  hostId            String
+  host              User          @relation("HostPayments", fields: [hostId], references: [id], onDelete: Cascade)
+  hackathonId       String?
+  hackathon         Hackathon?      @relation(fields: [hackathonId], references: [id], onDelete: SetNull)
+  amount            Float
+  currency          String        @default("INR")
+  status            PaymentStatus @default(PENDING)
+  providerPaymentId String?       @unique
+  invoiceId         String        @unique
+  userEmail         String?
+  paymentMethod     String?
+  receiptUrl        String?       // Path to generated PDF receipt
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+// ============================================
+// SYSTEM CONFIG (NEW MODEL - PLATFORM SETTINGS)
+// ============================================
+
+model SystemConfig {
+  key           String    @id
+  value         String
+  description   String?
+  updatedAt     DateTime  @updatedAt
+
+  @@map("system_config")
+}

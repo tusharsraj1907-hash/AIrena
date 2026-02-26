@@ -1,0 +1,1623 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #030213;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.8 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+
+}
+
+/* Ensure all text is visible in dark mode */
+body {
+  color: var(--foreground);
+}
+
+/* Ensure form elements have proper text color */
+input,
+select,
+textarea,
+label,
+p,
+span,
+div {
+  color: inherit;
+}
+
+/* Ensure select options are visible */
+select option {
+  background-color: white;
+  color: black;
+}
+
+/* Force all unstyled text elements to be visible */
+span:not([class*="text-"]):not([class*="sr-only"]) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+p:not([class*="text-"]) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+label:not([class*="text-"]) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+small:not([class*="text-"]) {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Ensure all text in dark containers is visible */
+.bg-slate-800 span:not([class*="text-"]),
+.bg-slate-900 span:not([class*="text-"]),
+.bg-slate-700 span:not([class*="text-"]) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.bg-slate-800 p:not([class*="text-"]),
+.bg-slate-900 p:not([class*="text-"]),
+.bg-slate-700 p:not([class*="text-"]) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Catch any remaining black text */
+* {
+  color: inherit;
+}
+
+/* Override any default browser black text */
+body * {
+  color: inherit !important;
+}
+
+/* Ensure no element has black text on dark background */
+[style*="color: black"],
+[style*="color: #000"],
+[style*="color: rgb(0, 0, 0)"] {}
+
+@theme inline {
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* CRITICAL: Prevent any black text on dark backgrounds */
+  * {
+    color: inherit;
+  }
+
+  /* Force all text elements to be visible on dark backgrounds */
+  p,
+  span,
+  div,
+  label,
+  small,
+  li,
+  td,
+  th {
+    color: inherit;
+  }
+
+  /* Override any default black text */
+  p:not([class*="text-"]) {
+    @apply text-slate-300;
+  }
+
+  span:not([class*="text-"]):not([class*="sr-only"]) {
+    @apply text-slate-300;
+  }
+
+  label:not([class*="text-"]) {
+    @apply text-slate-300;
+  }
+
+  small:not([class*="text-"]) {
+    @apply text-slate-400;
+  }
+
+  /* Ensure helper text is always visible */
+  .helper-text,
+  .hint-text,
+  .description-text {
+    @apply text-slate-400;
+  }
+
+  /* Force visibility in dark containers */
+  .bg-slate-800 *,
+  .bg-slate-900 *,
+  .bg-slate-700 * {
+    color: inherit;
+  }
+
+  .bg-slate-800 p:not([class*="text-"]),
+  .bg-slate-900 p:not([class*="text-"]),
+  .bg-slate-700 p:not([class*="text-"]) {
+    @apply text-slate-300;
+  }
+
+  .bg-slate-800 span:not([class*="text-"]):not([class*="sr-only"]),
+  .bg-slate-900 span:not([class*="text-"]):not([class*="sr-only"]),
+  .bg-slate-700 span:not([class*="text-"]):not([class*="sr-only"]) {
+    @apply text-slate-300;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Enhanced text visibility utilities */
+@layer utilities {
+  .text-visible {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .text-visible-secondary {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  .text-visible-muted {
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+
+  .placeholder-visible::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Override low-contrast text */
+  .text-white\/60,
+  .text-white\/70 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-slate-400,
+  .text-slate-500 {
+    color: rgba(148, 163, 184, 1) !important;
+  }
+}
+
+/* Custom scrollbar styles for better trackpad scrolling */
+@layer utilities {
+
+  /* Webkit scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(71 85 105) rgb(30 41 59);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgb(30 41 59);
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(71 85 105);
+    border-radius: 4px;
+    border: 1px solid rgb(30 41 59);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(100 116 139);
+  }
+
+  .scrollbar-thumb-slate-600::-webkit-scrollbar-thumb {
+    background: rgb(71 85 105);
+  }
+
+  .scrollbar-track-slate-800::-webkit-scrollbar-track {
+    background: rgb(30 41 59);
+  }
+
+  /* Smooth scrolling for modal content */
+  .modal-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Fix for modal scrolling issues */
+.modal-content {
+  position: relative;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Ensure proper touch scrolling on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .modal-scroll-area {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+  }
+}
+
+/* Responsive modal improvements */
+@media (max-width: 640px) {
+  .modal-content {
+    max-height: 95vh;
+    margin: 0.5rem;
+  }
+
+  .modal-scroll-area {
+    min-height: 300px !important;
+    max-height: calc(95vh - 250px) !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .modal-content {
+    max-height: 90vh;
+  }
+
+  .modal-scroll-area {
+    min-height: 350px !important;
+    max-height: calc(90vh - 280px) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .modal-content {
+    max-height: 90vh;
+  }
+
+  .modal-scroll-area {
+    min-height: 400px !important;
+    max-height: calc(90vh - 300px) !important;
+  }
+}
+
+/* Ensure dashboard layout stability */
+.dashboard-container {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.dashboard-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.dashboard-main {
+  margin-left: 256px;
+  /* Width of sidebar */
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Modal specific improvements */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+.modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.modal-content-wrapper {
+  pointer-events: auto;
+  max-width: 56rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Enhanced fixed sidebar - completely immobile */
+.sidebar-fixed {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 16rem !important;
+  height: 100vh !important;
+  z-index: 1000 !important;
+  overflow-y: auto !important;
+  transform: translateX(0) !important;
+  will-change: auto !important;
+  backface-visibility: hidden !important;
+}
+
+/* Prevent any scroll interference */
+.no-scroll-interference {
+  position: fixed !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Completely isolate sidebar from scroll events */
+.sidebar-isolated {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 16rem !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow-y: auto !important;
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  will-change: auto !important;
+  contain: layout style paint !important;
+}
+
+/* Ensure main content doesn't interfere with sidebar */
+.main-content-offset {
+  margin-left: 16rem !important;
+  width: calc(100% - 16rem) !important;
+  min-height: 100vh !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* CRITICAL PRODUCTION FIX: Ensure modals are always centered */
+@layer utilities {
+
+  /* Modal centering enforcement */
+  [data-slot="dialog-overlay"] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 50 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+  }
+
+  [data-slot="dialog-content"] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 51 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    pointer-events: none !important;
+  }
+
+  [data-slot="dialog-content"]>div {
+    pointer-events: auto !important;
+    position: relative !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    translate: none !important;
+    margin: auto !important;
+  }
+
+  /* Fix custom modal implementations */
+  .fixed.inset-0.z-50.flex.items-center.justify-center {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  /* Prevent sidebar interference with modals */
+  [data-slot="dialog-portal"] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 50 !important;
+  }
+
+  /* Ensure modal backdrop covers full viewport */
+  .modal-backdrop,
+  .fixed.inset-0.bg-black {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 50 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Override any container constraints */
+  [data-slot="dialog-content"] {
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  /* Ensure all modal containers are properly positioned */
+  .modal-container,
+  [class*="Modal"],
+  [class*="modal"] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 50 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+@layer utilities {
+
+  /* Override any black text that might appear */
+  .text-black {
+    @apply text-slate-300 !important;
+  }
+
+  /* Ensure all muted text is visible */
+  .text-muted-foreground {
+    @apply text-slate-400 !important;
+  }
+
+  /* Force helper text visibility */
+  .helper-text,
+  .hint-text,
+  .description-text,
+  .info-text {
+    @apply text-slate-400 !important;
+  }
+
+  /* Ensure empty state text is visible */
+  .empty-state p,
+  .empty-state span {
+    @apply text-slate-400 !important;
+  }
+
+  /* Modal text visibility */
+  [data-slot="dialog-content"] p:not([class*="text-"]) {
+    @apply text-slate-300 !important;
+  }
+
+  [data-slot="dialog-content"] span:not([class*="text-"]):not([class*="sr-only"]) {
+    @apply text-slate-300 !important;
+  }
+
+  /* Card text visibility */
+  .card p:not([class*="text-"]),
+  [class*="Card"] p:not([class*="text-"]) {
+    @apply text-slate-300 !important;
+  }
+
+  .card span:not([class*="text-"]):not([class*="sr-only"]),
+  [class*="Card"] span:not([class*="text-"]):not([class*="sr-only"]) {
+    @apply text-slate-300 !important;
+  }
+
+  /* Form helper text */
+  .form-helper,
+  .field-description,
+  .input-description {
+    @apply text-slate-400 !important;
+  }
+
+  /* Timeline and criteria helper text */
+  .timeline-helper,
+  .criteria-helper,
+  .registration-helper {
+    @apply text-slate-400 !important;
+  }
+}
+
+@layer utilities {
+
+  /* Fix all low-contrast text colors */
+  .text-slate-400 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-slate-500 {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  .text-slate-200 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .text-slate-300 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-gray-400 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-gray-500 {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  .text-purple-200 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .text-blue-200 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .text-green-200 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* Fix placeholder text visibility */
+  .placeholder\:text-slate-400::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Fix icon colors */
+  .text-slate-400.lucide,
+  .text-gray-400.lucide {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Ensure all text in dark backgrounds is visible */
+  .bg-slate-800 .text-slate-400,
+  .bg-slate-900 .text-slate-400,
+  .bg-slate-950 .text-slate-400 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Fix badge text visibility */
+  .bg-gray-500\/20 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* Fix all low-opacity white text */
+  .text-white\/60 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-white\/70 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .text-white\/80 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .text-white\/90 {
+    color: rgba(255, 255, 255, 0.98) !important;
+  }
+
+  /* Mobile-specific text improvements */
+  @media (max-width: 768px) {
+
+    .text-white\/60,
+    .text-white\/70,
+    .text-slate-400,
+    .text-slate-500,
+    .text-gray-400,
+    .text-gray-500,
+    .text-slate-200,
+    .text-slate-300 {
+      color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    /* Improve button text visibility on mobile */
+    button .text-white\/60,
+    button .text-white\/70 {
+      color: rgba(255, 255, 255, 1) !important;
+    }
+  }
+
+  /* Force white text for specific elements */
+  .force-white-text,
+  .force-white-text * {
+    color: white !important;
+  }
+
+  /* Fix descriptive text specifically */
+  p.text-white\/90,
+  p.text-white\/80,
+  p.text-white\/70,
+  p.text-white\/60 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* Fix small text visibility */
+  .text-xs.text-white\/70,
+  .text-xs.text-white\/60,
+  .text-sm.text-white\/70,
+  .text-sm.text-white\/60 {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+}
+
+/* Fix card background visibility globally */
+@layer utilities {
+
+  /* Override all low-opacity card backgrounds */
+  .bg-gradient-to-br.from-slate-800\/50 {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  .bg-gradient-to-br.from-slate-800\/60 {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  .bg-gradient-to-br.from-slate-800\/70 {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  .bg-gradient-to-br.from-slate-800\/80 {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  /* Fix specific card background patterns */
+  [class*="bg-gradient-to-br"][class*="from-slate-800/50"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  [class*="bg-gradient-to-br"][class*="from-slate-800/60"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  [class*="bg-gradient-to-br"][class*="from-slate-800/70"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  [class*="bg-gradient-to-br"][class*="from-slate-800/80"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+
+  /* Fix simple slate backgrounds */
+  .bg-slate-800\/50 {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+  }
+
+  .bg-slate-800\/60 {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+  }
+
+  .bg-slate-800\/70 {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+  }
+
+  .bg-slate-800\/80 {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+  }
+
+  .bg-slate-900\/50 {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+  }
+
+  .bg-slate-900\/60 {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+  }
+
+  .bg-slate-900\/70 {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+  }
+
+  .bg-slate-900\/80 {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+  }
+
+  /* Ensure cards are always visible */
+  .card-visible {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)) !important;
+    border: 1px solid rgba(71, 85, 105, 0.5) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  /* Fix all Card components globally */
+  .card,
+  [data-card],
+  [class*="Card"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+    border: 1px solid rgba(71, 85, 105, 0.5) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  /* Global card hover enhancement */
+  [class*="hover:border-blue"]:hover {
+    border-color: #3b82f6 !important;
+    border-width: 4px !important;
+    box-shadow:
+      0 0 0 4px rgba(59, 130, 246, 0.3),
+      0 20px 40px rgba(59, 130, 246, 0.2),
+      0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-4px) scale(1.03) !important;
+  }
+
+  /* Override specific low-opacity patterns */
+  [style*="background"][style*="rgba(30, 41, 59, 0.5)"],
+  [style*="background"][style*="rgba(15, 23, 42, 0.5)"],
+  [style*="background"][style*="rgba(30, 41, 59, 0.6)"],
+  [style*="background"][style*="rgba(15, 23, 42, 0.6)"],
+  [style*="background"][style*="rgba(30, 41, 59, 0.7)"],
+  [style*="background"][style*="rgba(15, 23, 42, 0.7)"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+  }
+}
+
+/* Global placeholder text visibility fix */
+@layer base {
+
+  /* Override all placeholder text to be more visible */
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Specific overrides for Tailwind classes */
+  .placeholder\:text-slate-400::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .placeholder\:text-gray-400::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .placeholder\:text-slate-500::placeholder {
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
+
+  /* Ensure all form inputs have visible placeholder text */
+  .bg-slate-800 input::placeholder,
+  .bg-slate-900 input::placeholder,
+  .bg-slate-700 input::placeholder,
+  .bg-slate-800 textarea::placeholder,
+  .bg-slate-900 textarea::placeholder,
+  .bg-slate-700 textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+}
+
+/* Force sidebar width constraints */
+.sidebar-isolated,
+aside.sidebar-isolated {
+  width: 16rem !important;
+  max-width: 16rem !important;
+  min-width: 16rem !important;
+  flex: none !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+}
+
+/* Ensure main content respects sidebar */
+.main-content-offset {
+  margin-left: 16rem !important;
+  width: calc(100vw - 16rem) !important;
+  max-width: calc(100vw - 16rem) !important;
+}
+
+/* Prevent any flex or grid interference */
+.dashboard-container {
+  display: block !important;
+}
+
+.dashboard-container>* {
+  display: block !important;
+}
+
+/* Comprehensive Responsive Design */
+@media (max-width: 768px) {
+
+  /* Mobile: Hide sidebar, make main content full width */
+  .sidebar-isolated,
+  aside.sidebar-isolated {
+    transform: translateX(-100%) !important;
+    z-index: 9999 !important;
+  }
+
+  .main-content-offset {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  /* Mobile modal adjustments */
+  .modal-content {
+    margin: 0.25rem !important;
+    max-height: 98vh !important;
+    border-radius: 0.5rem !important;
+  }
+
+  /* Mobile card adjustments */
+  .grid.md\\:grid-cols-2,
+  .grid.md\\:grid-cols-3,
+  .grid.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Mobile text sizing */
+  .text-3xl {
+    font-size: 1.875rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  /* Mobile padding adjustments */
+  .p-8 {
+    padding: 1rem !important;
+  }
+
+  .p-6 {
+    padding: 1rem !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  /* Tablet: Smaller sidebar */
+  .sidebar-isolated,
+  aside.sidebar-isolated {
+    width: 14rem !important;
+    max-width: 14rem !important;
+    min-width: 14rem !important;
+  }
+
+  .main-content-offset {
+    margin-left: 14rem !important;
+    width: calc(100vw - 14rem) !important;
+    max-width: calc(100vw - 14rem) !important;
+  }
+
+  /* Tablet grid adjustments */
+  .grid.lg\\:grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+
+  /* Desktop: Standard layout */
+  .sidebar-isolated,
+  aside.sidebar-isolated {
+    width: 16rem !important;
+    max-width: 16rem !important;
+    min-width: 16rem !important;
+  }
+
+  .main-content-offset {
+    margin-left: 16rem !important;
+    width: calc(100vw - 16rem) !important;
+    max-width: calc(100vw - 16rem) !important;
+  }
+}
+
+@media (min-width: 1441px) {
+
+  /* Large desktop: Wider sidebar */
+  .sidebar-isolated,
+  aside.sidebar-isolated {
+    width: 18rem !important;
+    max-width: 18rem !important;
+    min-width: 18rem !important;
+  }
+
+  .main-content-offset {
+    margin-left: 18rem !important;
+    width: calc(100vw - 18rem) !important;
+    max-width: calc(100vw - 18rem) !important;
+  }
+}
+
+/* Mobile navigation toggle (for future implementation) */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: block !important;
+    position: fixed !important;
+    top: 1rem !important;
+    left: 1rem !important;
+    z-index: 10000 !important;
+    background: rgba(59, 130, 246, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem !important;
+    color: white !important;
+  }
+}
+
+/* Ensure all text is readable on all devices */
+@media (max-width: 768px) {
+
+  .text-white\\/60,
+  .text-white\\/70,
+  .text-slate-400,
+  .text-slate-500 {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* Improve button sizing on mobile */
+  .btn-mobile {
+    min-height: 44px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .modal-scroll-area {
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Fix iOS viewport issues */
+  .dashboard-container {
+    min-height: -webkit-fill-available !important;
+  }
+}
+
+/* Android specific fixes */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+  .dashboard-container {
+    min-height: 100vh !important;
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+  }
+}
+
+/* Performance optimizations */
+@layer utilities {
+
+  /* Enhanced toast notifications */
+  .toast-success {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    border: 1px solid #34d399 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3) !important;
+  }
+
+  .toast-error {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    border: 1px solid #f87171 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3) !important;
+  }
+
+  .toast-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border: 1px solid #60a5fa !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3) !important;
+  }
+
+  .toast-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    border: 1px solid #fbbf24 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3) !important;
+  }
+
+  /* Smooth animations */
+  .smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Hardware acceleration */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Optimized shadows */
+  .shadow-optimized {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-optimized-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Backdrop blur optimization */
+  .backdrop-blur-optimized {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Enhanced card hover effects */
+  .card-hover-enhanced {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-hover-enhanced:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-color: #60a5fa !important;
+    border-width: 2px !important;
+    background: linear-gradient(to bottom right, rgba(30, 58, 138, 0.3), rgba(30, 41, 59, 0.9)) !important;
+  }
+
+  /* Glowing border effect */
+  .glow-border-blue {
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+
+  .glow-border-blue:hover {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5), 0 0 30px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Ultra-prominent card highlighting */
+  .card-highlight-ultra {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-highlight-ultra:hover {
+    transform: translateY(-8px) scale(1.03);
+    border: 4px solid #3b82f6 !important;
+    box-shadow:
+      0 0 0 4px rgba(59, 130, 246, 0.3),
+      0 25px 50px rgba(59, 130, 246, 0.25),
+      0 15px 30px rgba(0, 0, 0, 0.2),
+      inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(30, 41, 59, 0.9)) !important;
+  }
+
+  .card-highlight-ultra:hover::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.3;
+    animation: borderGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes borderGlow {
+    0% {
+      opacity: 0.3;
+      filter: blur(2px);
+    }
+
+    100% {
+      opacity: 0.6;
+      filter: blur(4px);
+    }
+  }
+
+  /* Pulsing highlight effect */
+  .card-pulse-highlight:hover {
+    animation: cardPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes cardPulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 0 20px rgba(59, 130, 246, 0);
+    }
+  }
+}
+}
+
+/* Landscape mobile adjustments */
+@media screen and (max-width: 1024px) and (orientation: landscape) and (max-height: 600px) {
+  .modal-content {
+    max-height: 95vh !important;
+  }
+
+  .modal-scroll-area {
+    max-height: calc(95vh - 200px) !important;
+  }
+}
+
+/* Modal card background fixes for consistency */
+@layer utilities {
+
+  /* Fix modal card backgrounds specifically */
+  .bg-slate-800\/50 {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+  }
+
+  .bg-slate-900\/50 {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+  }
+
+  /* Fix participant card backgrounds to match organizer section */
+  .bg-slate-800\/20 {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+  }
+
+  .bg-slate-800\/90 {
+    background-color: rgba(30, 41, 59, 1) !important;
+  }
+
+  .bg-slate-900\/90 {
+    background-color: rgba(15, 23, 42, 1) !important;
+  }
+
+  /* Modal specific card fixes */
+  [class*="modal"] [class*="Card"],
+  [class*="Modal"] [class*="Card"],
+  .modal-content [class*="Card"],
+  .modal-content .card {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+    border: 1px solid rgba(71, 85, 105, 0.8) !important;
+  }
+
+  /* Ensure consistent modal backgrounds */
+  [class*="HackathonDetailsModal"] [class*="Card"],
+  [class*="SubmissionDetailsModal"] [class*="Card"] {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)) !important;
+    border: 1px solid rgba(71, 85, 105, 0.8) !important;
+  }
+
+  /* Ensure participant hackathon cards match organizer visibility */
+  [class*="participant"] [class*="Card"],
+  .participant-card {
+    background: linear-gradient(to bottom right, rgba(30, 41, 59, 1), rgba(15, 23, 42, 1)) !important;
+    border: 1px solid rgba(71, 85, 105, 0.8) !important;
+  }
+}
+
+/* CRITICAL: Fix submission form text visibility */
+@layer utilities {
+
+  /* Ensure all text in ProjectSubmission component is visible */
+  .project-submission-form p:not([class*="text-"]),
+  .project-submission-form span:not([class*="text-"]):not([class*="sr-only"]),
+  .project-submission-form label:not([class*="text-"]),
+  .project-submission-form small:not([class*="text-"]) {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Fix specific text elements in upload areas */
+  .upload-area p:not([class*="text-"]),
+  .upload-area span:not([class*="text-"]):not([class*="sr-only"]) {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Fix file list text */
+  .file-list p:not([class*="text-"]),
+  .file-list span:not([class*="text-"]):not([class*="sr-only"]) {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Ensure GitHub repository link text is visible */
+  .github-input-container p:not([class*="text-"]),
+  .github-input-container span:not([class*="text-"]):not([class*="sr-only"]) {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Fix any remaining black text in forms */
+  form p:not([class*="text-"]),
+  form span:not([class*="text-"]):not([class*="sr-only"]),
+  form label:not([class*="text-"]),
+  form small:not([class*="text-"]) {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Fix placeholder text in dark inputs */
+  .bg-slate-800\/50 input::placeholder,
+  .bg-slate-800\/50 textarea::placeholder {
+    color: rgba(148, 163, 184, 0.8) !important;
+  }
+
+  /* Ensure all helper text is visible */
+  .helper-text,
+  .hint-text,
+  .description-text,
+  .info-text,
+  .required-text {
+    color: rgba(148, 163, 184, 1) !important;
+  }
+}
+
+@layer utilities {
+
+  /* Desktop: Position modal to the right of sidebar */
+  @media (min-width: 768px) {
+    .modal-avoid-sidebar {
+      left: 16rem !important;
+      width: calc(100vw - 16rem) !important;
+      justify-content: center !important;
+      /* Changed from flex-end to center */
+      padding: 1rem !important;
+    }
+  }
+
+  /* Mobile: Center modal normally */
+  @media (max-width: 767px) {
+    .modal-avoid-sidebar {
+      left: 0 !important;
+      width: 100vw !important;
+      justify-content: center !important;
+      padding: 1rem !important;
+    }
+  }
+
+  /* Ensure team registration modal always appears above hackathon details modal */
+  .team-registration-modal {
+    z-index: 10001 !important;
+  }
+
+  .team-registration-backdrop {
+    z-index: 10000 !important;
+  }
+
+  /* Ensure hackathon details modal doesn't interfere with team registration */
+  .hackathon-details-modal {
+    z-index: 9999 !important;
+  }
+
+  .hackathon-details-backdrop {
+    z-index: 9998 !important;
+  }
+
+  /* Ensure modal content is clickable */
+  .modal-avoid-sidebar>* {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: inherit !important;
+  }
+
+  /* Fix button interactions in modals */
+  .hackathon-details-modal button,
+  .team-registration-modal button {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
+
+@layer utilities {
+
+  /* Force modal portal to be completely independent */
+  body:has([data-slot="dialog-portal"]) {
+    overflow: hidden;
+  }
+
+  [data-slot="dialog-portal"],
+  .modal-portal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    isolation: isolate !important;
+    contain: layout style paint !important;
+  }
+
+  /* CRITICAL FIX: Ensure HackathonDetailsModal is properly centered and not affected by sidebar */
+  .fixed.inset-0.z-50.flex.items-center.justify-center.p-4 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* Ensure modal backdrop covers entire screen and is not affected by sidebar */
+  .fixed.inset-0.bg-black {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    z-index: 9998 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* Ensure modal content is centered within its container */
+  .fixed.inset-0.z-50.flex.items-center.justify-center.p-4>* {
+    margin: auto !important;
+    position: relative !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+  }
+
+  /* Override any grid or flex parent constraints that might affect modal positioning */
+  .fixed.inset-0.z-50 {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    flex: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* Ensure sidebar doesn't affect modal positioning */
+  .sidebar-isolated~* .fixed.inset-0,
+  .main-content-offset .fixed.inset-0 {
+    left: 0 !important;
+    margin-left: 0 !important;
+    width: 100vw !important;
+  }
+
+  /* Force modal to ignore any parent container margins or positioning */
+  [class*="dashboard"] .fixed.inset-0,
+  [class*="main"] .fixed.inset-0,
+  [class*="content"] .fixed.inset-0 {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+}
+
+/* CRITICAL: Ensure React Portal modals are completely isolated */
+@layer utilities {
+
+  /* Target modals rendered via React Portal at body level */
+  body>div[data-portal="modal"],
+  body>div:has(.fixed.inset-0.z-50) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    pointer-events: none !important;
+  }
+
+  body>div:has(.fixed.inset-0.z-50) .fixed.inset-0 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* Ensure portal modals ignore any parent constraints */
+  body>* {
+    isolation: isolate;
+  }
+
+  body>div:last-child {
+    isolation: auto !important;
+  }
+}

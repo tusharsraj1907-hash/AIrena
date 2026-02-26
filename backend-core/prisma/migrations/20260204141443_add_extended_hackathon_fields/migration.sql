@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "hackathons" ADD COLUMN     "category" TEXT NOT NULL DEFAULT 'WEB_DEVELOPMENT',
+ADD COLUMN     "contactEmail" TEXT,
+ADD COLUMN     "contactPerson" TEXT,
+ADD COLUMN     "contactPhone" TEXT,
+ADD COLUMN     "expectedOutcome" TEXT,
+ADD COLUMN     "guidelines" TEXT,
+ADD COLUMN     "judges" JSONB,
+ADD COLUMN     "judgingCriteria" JSONB,
+ADD COLUMN     "prizeAmount" DOUBLE PRECISION DEFAULT 0,
+ADD COLUMN     "prizeCurrency" TEXT DEFAULT 'USD',
+ADD COLUMN     "registrationStart" TIMESTAMP(3),
+ADD COLUMN     "rules" TEXT,
+ADD COLUMN     "termsAndConditions" TEXT,
+ADD COLUMN     "whyParticipate" TEXT;

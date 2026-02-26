@@ -1,0 +1,39 @@
+frontend
+    cd frontend
+    npm run dev
+
+backend
+    cd backend-core
+    npm run start:dev
+
+prisma
+    cd backend-core
+     npx prisma studio
+ 
+
+
+cloudflare:
+
+    brew install cloudflared 
+
+    curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64 -o cloudflared
+
+    chmod +x cloudflared
+
+    cloudflared tunnel --url http://localhost:3001
+
+
+
+if using jarvis labs run these commands to start the servers:
+
+    git clone repo
+    cd Hackathon 3
+    cd backend-core
+    npm install
+    npx prisma generate
+    npm run start:dev
+
+cd frontend
+npm install
+npm run build
+npm run preview
